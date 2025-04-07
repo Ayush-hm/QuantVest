@@ -8,10 +8,8 @@ export default function AddFundForm({ onAdd }) {
     const handleSubmit = (e) => {
         e.preventDefault();
 
-        // Send formatted data to parent handler
         onAdd({ scheme_name: schemeName, amount, buy_date: buyDate });
 
-        // Clear inputs
         setSchemeName("");
         setAmount("");
         setBuyDate("");

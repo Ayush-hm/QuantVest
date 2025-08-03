@@ -41,11 +41,11 @@ function App() {
         <div className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <h1 className="text-2xl font-semibold" style={{ background: 'var(--primary-gradient)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-              FundMate
+              QuantVest
             </h1>
             <span className="px-2 py-0.5 text-[10px] font-medium text-purple-600 bg-purple-100/50 rounded-full">Beta</span>
           </div>
-          <div className="flex items-center space-x-4">
+          <div className="flex   items-center space-x-4">
             <button className="glass-button">
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z" />

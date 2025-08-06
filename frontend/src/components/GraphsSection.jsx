@@ -157,8 +157,8 @@ export default function GraphsSection({ portfolio }) {
 
   const timeRanges = ['1M', '3M', '6M', '1Y', 'ALL'];
   
-  return (
-    <div className="glass-card p-6">
+  return (  
+    <div className="glass-card p-6 z-0">
       <div className="flex items-center justify-between mb-6">
         <h2 className="text-2xl font-semibold">Portfolio Performance</h2>
         <div className="flex gap-2">

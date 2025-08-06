@@ -1,6 +1,32 @@
-import React from "react";
+import React, { useState } from "react";
 
-export default function PortfolioList({ portfolio }) {
+export default function PortfolioList({ portfolio, onPortfolioUpdate }) {
+    const [editingFund, setEditingFund] = useState(null);
+    const [newAmount, setNewAmount] = useState("");
+
+    const handleEditClick = (fund) => {
+        setEditingFund(fund);
+        setNewAmount(fund.amount_invested.toString());
+    };
+
+    const handleUpdateAmount = async () => {
+        try {
+            const response = await fetch(`http://localhost:5000/portfolio/${editingFund.scheme_code}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ amount: parseFloat(newAmount) })
+            });
+
+            if (!response.ok) throw new Error('Failed to update investment amount');
+
+            setEditingFund(null);
+            if (onPortfolioUpdate) onPortfolioUpdate();
+        } catch (error) {
+            console.error('Error updating investment amount:', error);
+            alert('Failed to update investment amount. Please try again.');
+        }
+    };
+
     const totalInvestment = portfolio.reduce((sum, fund) => sum + fund.amount_invested, 0);
     const currentValue = portfolio.reduce((sum, fund) => {
         const currentPrice = fund.current_price ?? 0;
@@ -10,7 +36,7 @@ export default function PortfolioList({ portfolio }) {
     const totalPnLPercentage = ((totalPnL / totalInvestment) * 100).toFixed(2);
 
     return (
-        <div>
+        <div className="relative">
             <div className="flex items-center justify-between mb-6">
                 <h2 className="text-2xl font-semibold text-gray-800">Your Portfolio</h2>
                 <div className="flex gap-4">
@@ -66,7 +92,12 @@ export default function PortfolioList({ portfolio }) {
                                 return (
                                     <tr key={index} className="hover:bg-gray-50 transition-colors">
                                         <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            {fund.scheme_name}
+                                            <button
+                                                onClick={() => handleEditClick(fund)}
+                                                className="text-left hover:text-purple-600 transition-colors"
+                                            >
+                                                {fund.scheme_name}
+                                            </button>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 text-right">
                                             {fund.units.toFixed(3)}
@@ -93,6 +124,41 @@ export default function PortfolioList({ portfolio }) {
                         </tbody>
                     </table>
                 </div>
+            )}
+
+            {/* Modal */}
+            {editingFund && (
+                <>
+                    <div className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm z-40"></div>
+                    <div className="fixed inset-0 flex items-center justify-center z-50">
+                        <div className="bg-white rounded-xl p-6 w-full max-w-md shadow-lg border border-gray-200">
+                            <h3 className="text-xl font-semibold mb-4 text-gray-800">
+                                Edit Investment for {editingFund.scheme_name}
+                            </h3>
+                            <label className="block mb-2 text-sm font-medium text-gray-700">New Amount Invested (₹):</label>
+                            <input
+                                type="number"
+                                value={newAmount}
+                                onChange={(e) => setNewAmount(e.target.value)}
+                                className="w-full p-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-500 mb-4"
+                            />
+                            <div className="flex justify-end gap-4">
+                                <button
+                                    onClick={() => setEditingFund(null)}
+                                    className="px-4 py-2 bg-gray-200 rounded hover:bg-gray-300"
+                                >
+                                    Cancel
+                                </button>
+                                <button
+                                    onClick={handleUpdateAmount}
+                                    className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700"
+                                >
+                                    Update
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </>
             )}
         </div>
     );

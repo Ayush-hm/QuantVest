@@ -1,17 +1,21 @@
 import { useState, useEffect } from 'react';
+import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import './App.css';
 import AddFundForm from './components/AddFundForm';
 import PortfolioList from './components/PortfolioList';
 import GraphsSection from './components/GraphsSection';
 import MarketStatus from './components/MarketStatus';
+import RecommendedFunds from './components/RecommendedFunds';
 
 function App() {
   const [portfolio, setPortfolio] = useState([]);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const fetchPortfolio = async () => {
     try {
       const res = await fetch('http://localhost:5000/portfolio');
       const data = await res.json();
+      // Update state with the entire portfolio data including funds and summary
       setPortfolio(data);
     } catch (err) {
       console.error("Error fetching portfolio:", err);
@@ -36,6 +40,7 @@ function App() {
   }, []);
 
   return (
+    <Router>
     <div className="min-h-screen flex flex-col" style={{ background: 'var(--surface-gradient)' }}>
       <nav className="glass-effect sticky to  p-0 z-50 px-4 py-4 border-b border-white/20">
         <div className="flex items-center justify-between">
@@ -64,73 +69,31 @@ function App() {
       </nav>
 
       <main className="flex-1 px-4 py-6 mb-16">
-        <div className="space-y-6 max-w-7xl mx-auto">
-          {/* Add Fund Form Section */}
-          <div className="glass-card p-6">
-            <AddFundForm onAdd={handleAddFund} />
-            
-            {/* Recommended Funds Section */}
-            <div className="mt-8">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">Recommended Funds</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {[
-                  {
-                    name: "ICICI Prudential Technology Fund",
-                    category: "Sectoral/Tech",
-                    returns: "22.4% (3Y)",
-                    risk: "High"
-                  },
-                  {
-                    name: "Axis Small Cap Fund",
-                    category: "Small Cap",
-                    returns: "28.1% (3Y)",
-                    risk: "Very High"
-                  },
-                  {
-                    name: "Mirae Asset Large Cap Fund",
-                    category: "Large Cap",
-                    returns: "15.8% (3Y)",
-                    risk: "Moderate"
-                  }
-                ].map((fund, index) => (
-                  <div key={index} className="glass-card p-4 hover:shadow-lg transition-shadow duration-200">
-                    <div className="flex justify-between items-start mb-2">
-                      <h4 className="font-medium text-gray-900">{fund.name}</h4>
-                      <span className={`text-xs px-2 py-1 rounded-full ${
-                        fund.risk === 'High' ? 'bg-orange-100 text-orange-700' :
-                        fund.risk === 'Very High' ? 'bg-red-100 text-red-700' :
-                        'bg-yellow-100 text-yellow-700'
-                      }`}>
-                        {fund.risk}
-                      </span>
-                    </div>
-                    <div className="text-sm text-gray-600 mb-2">{fund.category}</div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm font-medium text-green-600">{fund.returns}</span>
-                      <button className="text-sm text-purple-600 hover:text-purple-700 font-medium">
-                        Add to Portfolio
-                      </button>
-                    </div>
-                  </div>
-                ))}
+        <Routes>
+          <Route path="/" element={
+            <div className="space-y-6 max-w-7xl mx-auto">
+              {/* Add Fund Form Section */}
+              <div className="glass-card p-6">
+                <AddFundForm onAdd={handleAddFund} />
+                <RecommendedFunds portfolio={portfolio} onAddFund={handleAddFund} />
+              </div>
+
+              {/* Portfolio and Graphs Section */}
+              <div className="space-y-6">
+                <div className="glass-card p-6">
+                  <PortfolioList portfolio={portfolio?.funds || []} />
+                </div>
+                <GraphsSection portfolio={portfolio?.funds || []} />
               </div>
             </div>
-          </div>
-
-          {/* Portfolio and Graphs Section */}
-          <div className="space-y-6">
-            <div className="glass-card p-6">
-              <PortfolioList portfolio={portfolio} />
-            </div>
-            <GraphsSection portfolio={portfolio} />
-          </div>
-        </div>
-      </main>
-
-      <footer className="glass-effect border-t border-white/20 fixed bottom-0 left-0 right-0 z-50">
+          } />
+          <Route path="*" element={<Navigate to="/" />} />
+        </Routes>
+      </main>      <footer className="glass-effect border-t border-white/20 fixed bottom-0 left-0 right-0 z-50">
         <MarketStatus />
       </footer>
     </div>
+    </Router>
   );
 }
 
